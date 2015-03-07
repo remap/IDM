@@ -11,7 +11,7 @@ The purpose of this software is to consume tracking data from OpenPtrack, and do
 a global JS variable 'active' holds the filtered and normalized track data. 
 
 ### Data Structures & Pseudocode
-
+```
 incoming tracks:
 
 tracks
@@ -61,6 +61,7 @@ for each track in tracks:
         //but hang onto them for a just bit before killing them
         if track.sampleTime - track.last > die;
 		tracking.remove(track)
+```
 ### How to use
 
 import the JS into your HTML artwork. 
