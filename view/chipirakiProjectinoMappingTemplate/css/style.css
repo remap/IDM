@@ -1,0 +1,32 @@
+body{
+	margin: 0px;
+	font-family: Arial;
+}
+
+div {
+	border: 1px black dotted;
+	float: left;
+}
+
+.wings{
+	width: 288px;
+	height: 595px;
+	background-color: blue;
+}
+
+#main_wall{
+	width: 976px;
+	height: 595px;
+	background-color: red;
+}
+
+.rear{
+	width: 179px;
+	height: 595px;
+	background-color: green;
+}
+
+h1 {
+	font-size: 4rem;
+	text-align: center;
+}
