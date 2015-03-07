@@ -2,6 +2,7 @@
 
 ### Prerequisites 
 1. [NDN-JS](https://github.com/named-data/ndn-js/blob/master/build/ndn.js)
+2. [NDN-JS Consumer Example] (https://github.com/remap/IDM/tree/master/view/basicNDNConsumer)
 
 ### Purpose
 
