@@ -2,6 +2,7 @@
 
 ### Prerequisites 
 1. [NDN-JS](https://github.com/named-data/ndn-js/blob/master/build/ndn.js)
+2. [NDN-JS Consumer Example] (https://github.com/remap/IDM/tree/master/view/basicNDNConsumer)
 
 ### Purpose
 
@@ -10,7 +11,7 @@ The purpose of this software is to consume tracking data from OpenPtrack, and do
 a global JS variable 'active' holds the filtered and normalized track data. 
 
 ### Data Structures & Pseudocode
-
+```
 incoming tracks:
 
 tracks
@@ -60,6 +61,7 @@ for each track in tracks:
         //but hang onto them for a just bit before killing them
         if track.sampleTime - track.last > die;
 		tracking.remove(track)
+```
 ### How to use
 
 import the JS into your HTML artwork. 
