@@ -80,8 +80,8 @@ Consumer.prototype.onTrackData = function(interest, data)
 
 Consumer.prototype.onTrackTimeout = function(interest)
 {
-  console.log("onTrackTimeout called: " + interest.getName().toUri());
-  console.log("Host: " + this.face.connectionInfo.toString());
+  //console.log("onTrackTimeout called: " + interest.getName().toUri());
+  // jb console.log("Host: " + this.face.connectionInfo.toString());
   
   // Express timeout interest; this may not be needed for track fetching:
   // we can reexpress the instant timeout happens.
@@ -156,8 +156,8 @@ Consumer.prototype.onHintData = function(interest, data)
 
 Consumer.prototype.onHintTimeout = function(interest)
 {
-  console.log("onHintTimeout called: " + interest.getName().toUri());
-  console.log("Host: " + this.face.connectionInfo.toString());
+  //console.log("onHintTimeout called: " + interest.getName().toUri());
+  //jb console.log("Host: " + this.face.connectionInfo.toString());
   
   // Express timeout interest; this may not be needed for track fetching:
   // we can express the instant timeout happens.
@@ -177,7 +177,7 @@ Consumer.prototype.onMetaData = function(interest, data)
 Consumer.prototype.onMetaTimeout = function(interest)
 {
   console.log("onTimeout called for interest " + interest.getName().toUri());
-  console.log("Host: " + this.face.connectionInfo.toString());
+  //jb console.log("Host: " + this.face.connectionInfo.toString());
 };
 
 Consumer.prototype.onInitialData = function(interest, data)
@@ -225,7 +225,7 @@ Consumer.prototype.dummyOnData = function(interest, data)
   console.log("DummyOnData called.");
 }
 
-// Start fetching the track from sequence number 0
+// Start fetching the track from using rightmostchild (JB) - can't start with seq 0 if we don't know if
 Consumer.prototype.fetchTrack = function(trackId)
 {
   var trackName = new Name(this.prefix);
@@ -233,10 +233,17 @@ Consumer.prototype.fetchTrack = function(trackId)
   trackName.append
     (this.startTimeComponent).append
     (ProducerNameComponents.tracks).append
-    (trackId.toString()).append("0");
+    (trackId.toString());  // .append("0");
   
+    // TODO: Use track hint. 
+
+
+
   var trackInterest = new Interest(trackName);
   trackInterest.setMustBeFresh(true);
+  
+  trackInterest.setChildSelector(1);   // Rightmost child
+
   this.face.expressInterest
     (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
 };
