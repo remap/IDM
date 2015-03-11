@@ -1,0 +1,92 @@
+<html xmlns = "http://www.w3.org/1999/xhtml">
+<meta charset="UTF-8">
+
+<head>
+  <title>NDN-OPT consumer webpage</title>
+
+  <script type="text/javascript" src="ndn.js"></script>
+  <script type="text/javascript" src="config.js"></script>
+  <script type="text/javascript" src="consumer.js"></script>
+  
+
+
+  <script type="text/javascript">
+    /**
+     * displayCallback is passed into the consumer's constructor, and is called when 
+     * the consumer receives track data.
+     * This displayCallback prints the re-stringified json object.
+     *
+     * @param {Decoded JSON object} the track data received from consumer
+     */
+    function isActiveTrack(arr, obj) {
+
+        for(var i=0; i<arr.length; i++) {
+          if (int(arr[i].id)==int(obj)) return true;
+        }
+        return false; 
+    }
+
+    var consumer; 
+    var tracks = []; 
+    function displayCallback(trackData)
+    {
+      //document.getElementById('content').innerHTML += 
+      //  "track data: " + JSON.stringify(trackData) + "<br>";
+        //console.log("displayCallback");
+
+        tracks[trackData.id] = {"x":trackData.x, "y":trackData.y, "z":trackData.z};
+
+        //if (!isActiveTrack(consumer.activeTracks, trackData.id))
+          //delete tracks[trackData.id];
+        //console.log(tracks[trackData.id])
+        document.getElementById('activetrack').innerHTML = ""; 
+        for (var id in tracks) {
+          document.getElementById('activetrack').innerHTML += 
+            "id:" + id + " x:"+tracks[id].x+ " " +"y:"+tracks[id].y + " " +"z:"+tracks[id].z  + "<br/>";
+        }
+        // hack, we should be getting a callback for empty hints!
+        //for (var i = 0; i < consumer.activeTracks.length; i++) {
+        //  document.getElementById('activetrack').innerHTML +=
+        //                consumer.activeTracks[i].id
+        //                + " (" + consumer.activeTracks[i].timeoutCnt + ") <br/>";
+        //}
+    }
+
+    
+ 
+    function run()
+    {
+
+
+
+      var face;
+      if (Config.hostName != "") {
+        if (Config.wsPort != 0) {
+          face = new Face({host: Config.hostName, port: Config.wsPort});
+        }
+        else {
+          face = new Face({host: Config.hostName});
+        }
+      }
+      else {
+        face = new Face();
+      }
+      
+      var rootPrefix = new Name(Config.rootPrefix);
+      var spaceName = new Name(Config.spaceName);
+      
+      consumer = new Consumer(face, rootPrefix, spaceName, displayCallback);
+      consumer.start();
+    }
+  </script>
+</head>
+
+<body>
+  <button id="testBtn" onclick="run()">Start consumer</button>
+
+  <p>Tracks:<br/></p>
+  <p id="activetrack">&nbsp;</p>
+
+</body>
+
+<html>

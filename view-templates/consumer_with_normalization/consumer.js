@@ -46,7 +46,7 @@ Consumer.prototype.getActiveTrack = function()
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/tracks/[track_num]/[seq_num]
 Consumer.prototype.onTrackData = function(interest, data)
 {
-  console.log(data.getName().toUri());
+  console.log("Data received: " + data.getName().toUri());
   var parsedTrack = JSON.parse(data.getContent().buf());
   this.trackData.push(parsedTrack);
   
@@ -65,22 +65,28 @@ Consumer.prototype.onTrackData = function(interest, data)
 						   "timeoutCnt": 0});
   }
   
-  var receivedSeq = interest.getName().get(-1).toEscapedString();
-  var seq = parseInt(receivedSeq) + 1;
+  var receivedSeq = data.getName().get(-1).toEscapedString();
+  //var seq = parseInt(receivedSeq) + 1;
   
-  var trackInterest = new Interest(data.getName().getPrefix(-1).append(seq.toString()));
-  
-  console.log(trackInterest.getName().toUri());
-  
+  var trackInterest = new Interest(data.getName().getPrefix(-1)); //.append(seq.toString()));
+
+  var exclude = new Exclude();
+  exclude.appendAny();
+  exclude.appendComponent(data.getName().get(-1));
+  trackInterest.setExclude(exclude);
+
   trackInterest.setMustBeFresh(true);
   trackInterest.setInterestLifetimeMilliseconds(Config.defaultTrackLifetime);
   this.face.expressInterest
     (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
+
+  console.log("Interest expressed: " + trackInterest.getName().toUri() + " excluding [ANY, "+receivedSeq+"]");
+  
 };
 
 Consumer.prototype.onTrackTimeout = function(interest)
 {
-  //console.log("onTrackTimeout called: " + interest.getName().toUri());
+  console.log("onTrackTimeout called: " + interest.getName().toUri());
   // jb console.log("Host: " + this.face.connectionInfo.toString());
   
   // Express timeout interest; this may not be needed for track fetching:
@@ -118,9 +124,9 @@ Consumer.prototype.indexOfTrackId = function(id)
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/track_hint/[num]
 Consumer.prototype.onHintData = function(interest, data)
 {
-  console.log("onHintData called: " + data.getName().toUri());
+  //console.log("onHintData called: " + data.getName().toUri());
   var parsedHint = JSON.parse(data.getContent().buf());
-  
+  //console.log("\t"+data.getContent().buf())
   for (var i = 0; i < parsedHint.tracks.length; i++) {
     
     // The consumer ignores the sequence number field in the hint for now;
@@ -129,6 +135,7 @@ Consumer.prototype.onHintData = function(interest, data)
     if (this.indexOfTrackId(parsedHint.tracks[i].id) == -1) {
       this.fetchTrack(parsedHint.tracks[i].id);
       this.activeTracks.push({"id": parsedHint.tracks[i].id,
+                              "seq": parsedHint.tracks[i].seq, 
                              "timeoutCnt": 0});
     }
   }
@@ -156,7 +163,7 @@ Consumer.prototype.onHintData = function(interest, data)
 
 Consumer.prototype.onHintTimeout = function(interest)
 {
-  //console.log("onHintTimeout called: " + interest.getName().toUri());
+  console.log("onHintTimeout called: " + interest.getName().toUri());
   //jb console.log("Host: " + this.face.connectionInfo.toString());
   
   // Express timeout interest; this may not be needed for track fetching:
@@ -164,6 +171,9 @@ Consumer.prototype.onHintTimeout = function(interest)
   //var timeout = new Interest(new Name("/local/timeout"));
   //timeout.setInterestLifetimeMilliseconds(Config.defaultReexpressInterval);
   
+  //jb 
+  this.activeTracks = [];
+
   this.face.expressInterest
     (interest, this.onHintData.bind(this), this.onHintTimeout.bind(this));
 };
@@ -225,8 +235,9 @@ Consumer.prototype.dummyOnData = function(interest, data)
   console.log("DummyOnData called.");
 }
 
+
 // Start fetching the track from using rightmostchild (JB) - can't start with seq 0 if we don't know if
-Consumer.prototype.fetchTrack = function(trackId)
+Consumer.prototype.fetchTrack= function(trackId)
 {
   var trackName = new Name(this.prefix);
   
@@ -236,8 +247,6 @@ Consumer.prototype.fetchTrack = function(trackId)
     (trackId.toString());  // .append("0");
   
     // TODO: Use track hint. 
-
-
 
   var trackInterest = new Interest(trackName);
   trackInterest.setMustBeFresh(true);
