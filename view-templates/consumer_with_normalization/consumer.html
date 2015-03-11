@@ -1,0 +1,81 @@
+<html xmlns = "http://www.w3.org/1999/xhtml">
+<meta charset="UTF-8">
+
+<head>
+  <title>NDN-OPT consumer webpage</title>
+
+  <script type="text/javascript" src="ndn.js"></script>
+  <script type="text/javascript" src="config.js"></script>
+  <script type="text/javascript" src="consumer.js"></script>
+  
+  <script type="text/javascript">
+    
+
+    /**
+     * Simple Normalization function based on calibrated maxima.
+     *
+     * @param {Decoded JSON object} the track data received from consumer
+     */
+    function normalize(data){
+        var maxX = 2;
+        var minX = -4.4;
+        var maxY = 3;
+        var minY = -1;    
+
+        data.x = (data.x + Math.abs(minX)) / (maxX + Math.abs(minX));
+        data.y = (data.y + Math.abs(minY)) / (maxY + Math.abs(minY));
+    }
+
+    /**
+     * displayCallback is passed into the consumer's constructor, and is called when 
+     * the consumer receives track data.
+     * This displayCallback prints the re-stringified json object.
+     *
+     * @param {Decoded JSON object} the track data received from consumer
+     */
+    function displayCallback(trackData)
+    {
+      // Zhehao's example
+      document.getElementById('content').innerHTML += 
+      "track data: " + JSON.stringify(trackData) + "<br>";
+
+      // make a copy of the object
+      var data = JSON.parse(JSON.stringify(trackData));
+
+      normalize(data);
+
+      console.log("x " + data.x + " y " + data.y);
+
+    }
+    
+    function run()
+    {
+      var face;
+      if (Config.hostName != "") {
+        if (Config.wsPort != 0) {
+          face = new Face({host: Config.hostName, port: Config.wsPort});
+        }
+        else {
+          face = new Face({host: Config.hostName});
+        }
+      }
+      else {
+        face = new Face();
+      }
+      
+      var rootPrefix = new Name(Config.rootPrefix);
+      var spaceName = new Name(Config.spaceName);
+      
+      var consumer = new Consumer(face, rootPrefix, spaceName, displayCallback);
+      consumer.start();
+    }
+  </script>
+</head>
+
+<body>
+  <button id="testBtn" onclick="run()">Start consumer</button>
+
+  <p id="content">Content: <br/></p>
+</body>
+
+<html>
