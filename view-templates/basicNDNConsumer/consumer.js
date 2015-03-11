@@ -25,18 +25,20 @@ var Consumer = function(face, root, spaceName, displayCallback)
   // this records the indices of the tracks that have been active since the start of this run.
   this.activeTracks = [];
   
+  // JB - commented out as it will generate a significant memory leak 
   // All fetched track data is stored in this array: may want to organize it.
   // Are we expecting a large number of entries, which means I should flush this array at some point?
-  this.trackData = [];
+  //this.trackData = [];
   
   // Display callback is called once track data is received
   this.displayCallback = displayCallback;
 };
 
-Consumer.prototype.getTrackData = function()
-{
-  return this.trackData;
-};
+
+// Consumer.prototype.getTrackData = function()
+// {
+//   return this.trackData;
+// };
 
 Consumer.prototype.getActiveTrack = function()
 {
@@ -46,10 +48,29 @@ Consumer.prototype.getActiveTrack = function()
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/tracks/[track_num]/[seq_num]
 Consumer.prototype.onTrackData = function(interest, data)
 {
-  console.log("Data received: " + data.getName().toUri());
-  var parsedTrack = JSON.parse(data.getContent().buf());
-  this.trackData.push(parsedTrack);
+  //console.log("Data received: " + data.getName().toUri());
+
   
+  // Re-express interest before doing any other work
+  
+  var receivedSeq = data.getName().get(-1).toEscapedString();;
+  var trackInterest = new Interest(data.getName().getPrefix(-1)); //.append(seq.toString()));
+  var exclude = new Exclude();
+  exclude.appendAny();
+  exclude.appendComponent(data.getName().get(-1));
+  trackInterest.setExclude(exclude);
+
+  trackInterest.setMustBeFresh(true);
+  trackInterest.setInterestLifetimeMilliseconds(Config.defaultTrackLifetime);
+  this.face.expressInterest
+    (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
+  //console.log("Interest expressed: " + trackInterest.getName().toUri() + " excluding [ANY, "+receivedSeq+"]");
+
+  // Now process the data
+
+  var parsedTrack = JSON.parse(data.getContent().buf());
+  //this.trackData.push(parsedTrack);
+
   if (this.displayCallback) {
     this.displayCallback(parsedTrack);
   }
@@ -63,25 +84,8 @@ Consumer.prototype.onTrackData = function(interest, data)
   else {
 	this.activeTracks.push({"id": trackId,
 						   "timeoutCnt": 0});
-  }
-  
-  var receivedSeq = data.getName().get(-1).toEscapedString();
-  //var seq = parseInt(receivedSeq) + 1;
-  
-  var trackInterest = new Interest(data.getName().getPrefix(-1)); //.append(seq.toString()));
+  } 
 
-  var exclude = new Exclude();
-  exclude.appendAny();
-  exclude.appendComponent(data.getName().get(-1));
-  trackInterest.setExclude(exclude);
-
-  trackInterest.setMustBeFresh(true);
-  trackInterest.setInterestLifetimeMilliseconds(Config.defaultTrackLifetime);
-  this.face.expressInterest
-    (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
-
-  console.log("Interest expressed: " + trackInterest.getName().toUri() + " excluding [ANY, "+receivedSeq+"]");
-  
 };
 
 Consumer.prototype.onTrackTimeout = function(interest)
