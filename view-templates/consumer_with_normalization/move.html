@@ -3,30 +3,41 @@
 
 <head>
   <title>NDN-OPT consumer webpage</title>
-  <script type="text/javascript" src="jquery-1.11.2.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
 
+  <script type="text/javascript" src="jquery-1.11.2.js"></script>
   <script type="text/javascript" src="ndn.js"></script>
   <script type="text/javascript" src="config.js"></script>
   <script type="text/javascript" src="consumer.js"></script>
-
-  
   <script type="text/javascript">
-    
 
     /**
      * Simple Normalization function based on calibrated maxima.
-     *
+     * This function doesn't need a return, objects in Javascript are pass-by-reference
      * @param {Decoded JSON object} the track data received from consumer
      */
+  
     function normalize(data){
-        var maxX = 2;
-        var minX = -4.4;
-        var maxY = 3;
-        var minY = -1;    
+        var maxX = 2.3;
+        var minX = -1.4;
+        var maxY = 2.2;
+        var minY = -4.4;    
 
         data.x = (data.x + Math.abs(minX)) / (maxX + Math.abs(minX));
         data.y = (data.y + Math.abs(minY)) / (maxY + Math.abs(minY));
-        return data; 
+        
+
+        if (data.x < 0.0 ) {
+            data.x = 0.0;
+        } else if (data.x > 1.0) {
+            data.x = 1.0;
+        }
+
+        if (data.y < 0.0 ) {
+            data.y = 0.0;
+        } else if (data.y > 1.0) {
+            data.y = 1.0;
+        }
     }
 
     /**
@@ -40,24 +51,16 @@
     $( document ).ready(function() {
       function displayCallback(trackData)
         {
-          // Zhehao's example
-          //document.getElementById('content').innerHTML += 
-          //"track data: " + JSON.stringify(trackData) + "<br>";
 
           // make a copy of the object
           var data = JSON.parse(JSON.stringify(trackData));
 
-          //data = normalize(data);
+          normalize(data);
 
-          y = (9-(data.y+6)) * 100
-          x = (4.5-(data.x+2)) * 100  
-          //console.log("data.x " + data.x + " data.y " + data.y + ", square x " + x + ", square y " +y);
+          console.log("data.x " + data.x + "data.y" + data.y);          
 
-
-          //$("#square").animate({ top: y, left: x});
-
-          $('#square').css("top", y );
-           $('#square').css("left", x ); 
+          $('#square').css("top", (data.y*597) - 50);
+          $('#square').css("left", (data.x*1920) - 50); 
 
         }
         
@@ -91,7 +94,7 @@
 </head>
 
 <body>
-  <div id="square" style="position:absolute;">FOO</div>
+  <div id="square"></div>
 </body>
 
 <html>
