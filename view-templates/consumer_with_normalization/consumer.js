@@ -62,7 +62,7 @@ Consumer.prototype.onTrackData = function(interest, data)
   if (delta > limit)
   {
     overLimitNum++;    
-    console.log('over limit: '+delta+ ' ' + overLimitNum);
+    //console.log('over limit: '+delta+ ' ' + overLimitNum);
   }
 
   lastOnDataTs = now;
@@ -91,7 +91,7 @@ Consumer.prototype.onTrackData = function(interest, data)
       var startSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq;
       var endSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq+moreInterests;
       this.activeTracks[activeTrackIndex].lastIssuedSeq = endSeq;
-      this.pipeline(trackName, startSeq, endSeq)
+      this.pipeline(trackName, startSeq, endSeq);
     }
   }
   else
@@ -221,17 +221,6 @@ Consumer.prototype.onHintTimeout = function(interest)
 
   this.face.expressInterest
     (interest, this.onHintData.bind(this), this.onHintTimeout.bind(this));
-};
-
-// Meta data not yet published
-Consumer.prototype.onMetaData = function(interest, data)
-{ 
-};
-
-Consumer.prototype.onMetaTimeout = function(interest)
-{
-  console.log("onTimeout called for interest " + interest.getName().toUri());
-  //jb console.log("Host: " + this.face.connectionInfo.toString());
 };
 
 Consumer.prototype.onInitialData = function(interest, data)
