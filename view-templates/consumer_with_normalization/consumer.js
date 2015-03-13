@@ -1,9 +1,10 @@
 // consumer.js
 //
-//  Copyright 2014 Regents of the University of California
+//  Copyright 2015 Regents of the University of California
 //  For licensing details see the LICENSE file.
 //
-//  Author:  Zhehao Wang
+//  Author:  Zhehao Wang; Peter Gusev
+//  March 12 5PM version with initial interest pipelining.
 
 /**
  * Consumer creates a consumer for ndn-opt; The consumer follows the protocol
