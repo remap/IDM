@@ -49,36 +49,20 @@ Consumer.prototype.getActiveTrack = function()
   return this.activeTracks;
 };
 
-var limit = 0;
-var overLimitNum = 0;
-var lastOnDataTs = 0;
-
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/tracks/[track_num]/[seq_num]
 Consumer.prototype.onTrackData = function(interest, data)
 {
-  var now = (new Date).getTime();
-  var delta = now - lastOnDataTs;
-
-  if (delta > limit)
-  {
-    overLimitNum++;    
-    //console.log('over limit: '+delta+ ' ' + overLimitNum);
-  }
-
-  lastOnDataTs = now;
-
-  var trackId = parseInt(interest.getName().get
+  var trackId = parseInt(data.getName().get
     (ProducerNameComponents.trackIdOffset).toEscapedString());
   var activeTrackIndex = this.indexOfTrackId(trackId);
-  var receivedSeq = parseInt(data.getName().get(ProducerNameComponents.trackSeqOffset).toEscapedString());
-
+  var receivedSeq = parseInt(data.getName().get(-1).toEscapedString());
 
   if (!this.activeTracks[activeTrackIndex])
   {
     console.log("onData: no data for "+trackId + " idx "+activeTrackIndex);
     return ;
   }
-
+  
   if (receivedSeq > this.activeTracks[activeTrackIndex].lastReceivedSeq)
   {
     this.activeTracks[activeTrackIndex].lastReceivedSeq = receivedSeq;
@@ -91,7 +75,7 @@ Consumer.prototype.onTrackData = function(interest, data)
       var startSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq;
       var endSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq+moreInterests;
       this.activeTracks[activeTrackIndex].lastIssuedSeq = endSeq;
-      this.pipeline(trackName, startSeq, endSeq);
+      this.pipeline(trackName, startSeq, endSeq)
     }
   }
   else
@@ -100,15 +84,12 @@ Consumer.prototype.onTrackData = function(interest, data)
     return ; 
   }
 
-  // Now process the data
-
   var parsedTrack = JSON.parse(data.getContent().buf());
   //this.trackData.push(parsedTrack);
 
   if (this.displayCallback) {
     this.displayCallback(parsedTrack);
   }
-  
 
   if (activeTrackIndex != -1) {
     this.activeTracks[activeTrackIndex].timeoutCnt = 0;
@@ -117,7 +98,6 @@ Consumer.prototype.onTrackData = function(interest, data)
 	this.activeTracks.push({"id": trackId,
 						   "timeoutCnt": 0});
   } 
-
 };
 
 Consumer.prototype.onTrackTimeout = function(interest)
@@ -221,6 +201,17 @@ Consumer.prototype.onHintTimeout = function(interest)
 
   this.face.expressInterest
     (interest, this.onHintData.bind(this), this.onHintTimeout.bind(this));
+};
+
+// Meta data not yet published
+Consumer.prototype.onMetaData = function(interest, data)
+{ 
+};
+
+Consumer.prototype.onMetaTimeout = function(interest)
+{
+  console.log("onTimeout called for interest " + interest.getName().toUri());
+  //jb console.log("Host: " + this.face.connectionInfo.toString());
 };
 
 Consumer.prototype.onInitialData = function(interest, data)
