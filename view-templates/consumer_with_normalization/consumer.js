@@ -15,6 +15,9 @@
  * @param {Name} The [space_name] prefix that producer uses; Full prefix = [root]/[space_name]
  * @param {function(decoded JSON object)} Function called whenever the consumer fetched track data
  */
+
+var PipelineSize = 10;
+
 var Consumer = function(face, root, spaceName, displayCallback)
 {
   this.face = face;
@@ -45,26 +48,56 @@ Consumer.prototype.getActiveTrack = function()
   return this.activeTracks;
 };
 
+var limit = 0;
+var overLimitNum = 0;
+var lastOnDataTs = 0;
+
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/tracks/[track_num]/[seq_num]
 Consumer.prototype.onTrackData = function(interest, data)
 {
-  //console.log("Data received: " + data.getName().toUri());
+  var now = (new Date).getTime();
+  var delta = now - lastOnDataTs;
 
-  
-  // Re-express interest before doing any other work
-  
-  var receivedSeq = data.getName().get(-1).toEscapedString();;
-  var trackInterest = new Interest(data.getName().getPrefix(-1)); //.append(seq.toString()));
-  var exclude = new Exclude();
-  exclude.appendAny();
-  exclude.appendComponent(data.getName().get(-1));
-  trackInterest.setExclude(exclude);
+  if (delta > limit)
+  {
+    overLimitNum++;    
+    console.log('over limit: '+delta+ ' ' + overLimitNum);
+  }
 
-  trackInterest.setMustBeFresh(true);
-  trackInterest.setInterestLifetimeMilliseconds(Config.defaultTrackLifetime);
-  this.face.expressInterest
-    (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
-  //console.log("Interest expressed: " + trackInterest.getName().toUri() + " excluding [ANY, "+receivedSeq+"]");
+  lastOnDataTs = now;
+
+  var trackId = parseInt(interest.getName().get
+    (ProducerNameComponents.trackIdOffset).toEscapedString());
+  var activeTrackIndex = this.indexOfTrackId(trackId);
+  var receivedSeq = parseInt(data.getName().get(ProducerNameComponents.trackSeqOffset).toEscapedString());
+
+
+  if (!this.activeTracks[activeTrackIndex])
+  {
+    console.log("onData: no data for "+trackId + " idx "+activeTrackIndex);
+    return ;
+  }
+
+  if (receivedSeq > this.activeTracks[activeTrackIndex].lastReceivedSeq)
+  {
+    this.activeTracks[activeTrackIndex].lastReceivedSeq = receivedSeq;
+    var moreInterests = PipelineSize+receivedSeq-this.activeTracks[activeTrackIndex].lastIssuedSeq;
+    //console.log("more "+moreInterests+" to issue. last "+this.activeTracks[activeTrackIndex].lastIssuedSeq + " received "+receivedSeq + " size "+PipelineSize);
+
+    if (moreInterests != 0)
+    {
+      var trackName = new Name(data.getName().getPrefix(-1));
+      var startSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq;
+      var endSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq+moreInterests;
+      this.activeTracks[activeTrackIndex].lastIssuedSeq = endSeq;
+      this.pipeline(trackName, startSeq, endSeq)
+    }
+  }
+  else
+  {
+    // out-dated data, don't bother
+    return ; 
+  }
 
   // Now process the data
 
@@ -75,9 +108,7 @@ Consumer.prototype.onTrackData = function(interest, data)
     this.displayCallback(parsedTrack);
   }
   
-  var trackId = parseInt(interest.getName().get
-    (ProducerNameComponents.trackIdOffset).toEscapedString());
-  var activeTrackIndex = this.indexOfTrackId(trackId);
+
   if (activeTrackIndex != -1) {
     this.activeTracks[activeTrackIndex].timeoutCnt = 0;
   }
@@ -90,7 +121,8 @@ Consumer.prototype.onTrackData = function(interest, data)
 
 Consumer.prototype.onTrackTimeout = function(interest)
 {
-  console.log("onTrackTimeout called: " + interest.getName().toUri());
+  //console.log("timeout interest "+interest.getName().toUri());
+ // console.log("onTrackTimeout called: " + interest.getName().toUri());
   // jb console.log("Host: " + this.face.connectionInfo.toString());
   
   // Express timeout interest; this may not be needed for track fetching:
@@ -102,16 +134,22 @@ Consumer.prototype.onTrackTimeout = function(interest)
   var trackId = parseInt(interest.getName().get
     (ProducerNameComponents.trackIdOffset).toEscapedString());
   var activeTrackIndex = this.indexOfTrackId(trackId);
-  
-  if (activeTrackIndex != -1) {
-    if (this.activeTracks[activeTrackIndex].timeoutCnt < Config.trackTimeoutThreshold) {
-	  this.face.expressInterest
-	    (interest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
-	  this.activeTracks[activeTrackIndex].timeoutCnt ++;
-	}
-	else {
-	  this.activeTracks.splice(activeTrackIndex, 1);
-	}
+  var trackSeqNo = parseInt(interest.getName().get
+    (ProducerNameComponents.trackSeqOffset).toEscapedString());
+
+  if (!this.activeTracks[activeTrackIndex])
+  {
+    console.log("onTimeout: no data for "+trackId + " idx "+activeTrackIndex);
+    return ;
+  }
+
+  if (this.activeTracks[activeTrackIndex] &&
+    trackSeqNo > this.activeTracks[activeTrackIndex].lastReceivedSeq)
+  {
+    // re-express
+    //console.log('re-express '+interest.getName().toUri()+ ". last received "+this.activeTracks[activeTrackIndex].lastReceivedSeq);
+    this.face.expressInterest
+        (interest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
   }
 };
 
@@ -137,10 +175,12 @@ Consumer.prototype.onHintData = function(interest, data)
     // As the consumer assumes it's getting the latest via outstanding interest.
     // Right now the consumer does not stop fetching tracks that have become inactive.
     if (this.indexOfTrackId(parsedHint.tracks[i].id) == -1) {
-      this.fetchTrack(parsedHint.tracks[i].id);
       this.activeTracks.push({"id": parsedHint.tracks[i].id,
                               "seq": parsedHint.tracks[i].seq, 
-                             "timeoutCnt": 0});
+                              "timeoutCnt": 0,
+                              "lastReceivedSeq": 0,
+                              "lastIssuedSeq": 0});
+      this.fetchTrack(parsedHint.tracks[i].id, parsedHint.tracks[i].seq);
     }
   }
   // express interest for the new hint
@@ -184,8 +224,7 @@ Consumer.prototype.onHintTimeout = function(interest)
 
 // Meta data not yet published
 Consumer.prototype.onMetaData = function(interest, data)
-{
-  
+{ 
 };
 
 Consumer.prototype.onMetaTimeout = function(interest)
@@ -239,9 +278,8 @@ Consumer.prototype.dummyOnData = function(interest, data)
   console.log("DummyOnData called.");
 }
 
-
 // Start fetching the track from using rightmostchild (JB) - can't start with seq 0 if we don't know if
-Consumer.prototype.fetchTrack= function(trackId)
+Consumer.prototype.fetchTrack= function(trackId, seqNo)
 {
   var trackName = new Name(this.prefix);
   
@@ -250,16 +288,26 @@ Consumer.prototype.fetchTrack= function(trackId)
     (ProducerNameComponents.tracks).append
     (trackId.toString());  // .append("0");
   
-    // TODO: Use track hint. 
-
-  var trackInterest = new Interest(trackName);
-  trackInterest.setMustBeFresh(true);
-  
-  trackInterest.setChildSelector(1);   // Rightmost child
-
-  this.face.expressInterest
-    (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
+  var trackIdx = this.indexOfTrackId(trackId);
+  this.activeTracks[trackIdx].lastIssuedSeq = seqNo+PipelineSize;
+  this.pipeline(trackName, seqNo, this.activeTracks[trackIdx].lastIssuedSeq);
 };
+
+Consumer.prototype.pipeline = function (trackName, startSeqNo, endSeqNo)
+{
+  for (var seqNo = startSeqNo; seqNo <= endSeqNo; seqNo++)  
+  {
+    var interestName = new Name(trackName);
+    interestName.append(seqNo.toString());
+
+    var trackInterest = new Interest(interestName);
+    trackInterest.setMustBeFresh(true);
+    this.face.expressInterest
+    (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));    
+    //console.log("pipelining interest "+ trackInterest.getName().toUri())
+  }
+  //console.log("pipelined interests for "+trackName.toUri()+" "+startSeqNo+":"+endSeqNo);
+}
 
 Consumer.prototype.fetchTrackHint = function()
 {

@@ -28,5 +28,6 @@ Config = {
 ProducerNameComponents = {
   tracks		: "tracks",
   trackHint		: "track_hint",
-  trackIdOffset	: -2
+  trackIdOffset	: -2,
+  trackSeqOffset : -1
 };
