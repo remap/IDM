@@ -17,7 +17,16 @@
  * @param {function(decoded JSON object)} Function called whenever the consumer fetched track data
  */
 
+var Face = require('ndn-js').Face;
+var Name = require('ndn-js').Name;
+
+var Interest = require('ndn-js').Interest;
+var Data = require('ndn-js').Data;
+var Exclude = require('ndn-js').Exclude;
+
 var PipelineSize = 10;
+
+var lastReceivedTimestamp = 0;
 
 var Consumer = function(face, root, spaceName, displayCallback)
 {
@@ -52,6 +61,11 @@ Consumer.prototype.getActiveTrack = function()
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/tracks/[track_num]/[seq_num]
 Consumer.prototype.onTrackData = function(interest, data)
 {
+  var receivedTime = (new Date).getTime();
+  var timeGap = receivedTime - lastReceivedTimestamp;
+  lastReceivedTimestamp = receivedTime;
+  console.log("Time gap between this and last received data: " + timeGap);
+  
   var trackId = parseInt(data.getName().get
     (ProducerNameComponents.trackIdOffset).toEscapedString());
   var activeTrackIndex = this.indexOfTrackId(trackId);
@@ -102,7 +116,7 @@ Consumer.prototype.onTrackData = function(interest, data)
 
 Consumer.prototype.onTrackTimeout = function(interest)
 {
-  //console.log("timeout interest "+interest.getName().toUri());
+  console.log("timeout interest "+interest.getName().toUri());
  // console.log("onTrackTimeout called: " + interest.getName().toUri());
   // jb console.log("Host: " + this.face.connectionInfo.toString());
   
@@ -317,3 +331,5 @@ Consumer.prototype.start = function() {
   this.face.expressInterest
     (initialInterest, this.onInitialData.bind(this), this.onInitialTimeout.bind(this));
 };
+
+exports.Consumer = Consumer;
