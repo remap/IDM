@@ -5,6 +5,15 @@
 //
 //  Author:  Zhehao Wang
 
+var Face = require('ndn-js').Face;
+var Name = require('ndn-js').Name;
+
+var Interest = require('ndn-js').Interest;
+var Data = require('ndn-js').Data;
+var Exclude = require('ndn-js').Exclude;
+
+var lastReceivedTimestamp = 0;
+
 /**
  * Consumer creates a consumer for ndn-opt; The consumer follows the protocol
  * described here: https://github.com/named-data/ndn-opt/tree/master/publisher
@@ -49,7 +58,10 @@ Consumer.prototype.getActiveTrack = function()
 Consumer.prototype.onTrackData = function(interest, data)
 {
   //console.log("Data received: " + data.getName().toUri());
-
+  var receivedTime = (new Date).getTime();
+  var timeGap = receivedTime - lastReceivedTimestamp;
+  lastReceivedTimestamp = receivedTime;
+  console.log("Time gap between this and last received data: " + timeGap);
   
   // Re-express interest before doing any other work
   
@@ -288,3 +300,5 @@ Consumer.prototype.start = function() {
   this.face.expressInterest
     (initialInterest, this.onInitialData.bind(this), this.onInitialTimeout.bind(this));
 };
+
+exports.Consumer = Consumer;
