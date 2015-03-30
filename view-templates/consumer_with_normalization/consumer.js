@@ -290,7 +290,7 @@ Consumer.prototype.fetchTrack= function(trackId, seqNo)
 
 Consumer.prototype.pipeline = function (trackName, startSeqNo, endSeqNo)
 {
-  for (var seqNo = startSeqNo; seqNo <= endSeqNo; seqNo++)  
+  for (var seqNo = startSeqNo + 1; seqNo <= endSeqNo; seqNo++)  
   {
     var interestName = new Name(trackName);
     interestName.append(seqNo.toString());
@@ -298,8 +298,8 @@ Consumer.prototype.pipeline = function (trackName, startSeqNo, endSeqNo)
     var trackInterest = new Interest(interestName);
     trackInterest.setMustBeFresh(true);
     this.face.expressInterest
-    (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));    
-    //console.log("pipelining interest "+ trackInterest.getName().toUri())
+      (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));    
+    console.log("pipelining interest "+ trackInterest.getName().toUri())
   }
   //console.log("pipelined interests for "+trackName.toUri()+" "+startSeqNo+":"+endSeqNo);
 }

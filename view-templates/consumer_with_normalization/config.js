@@ -8,7 +8,7 @@
 Config = {
   // Face configuration, as connectivity to default WS on NDN testbed is not necessary
   hostName					: "192.168.56.101",
-  wsPort					: 6363,
+  wsPort					: 0,
   
   // Namespace configuration
   rootPrefix				: "/ndn/edu/ucla/remap/opt",
