@@ -140,7 +140,7 @@ Consumer.prototype.indexOfTrackId = function(id)
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/track_hint/[num]
 Consumer.prototype.onHintData = function(interest, data)
 {
-  //console.log("onHintData called: " + data.getName().toUri());
+  console.log("onHintData called: " + data.getName().toUri());
   var parsedHint = JSON.parse(data.getContent().buf());
   //console.log("\t"+data.getContent().buf())
   for (var i = 0; i < parsedHint.tracks.length; i++) {
@@ -153,6 +153,7 @@ Consumer.prototype.onHintData = function(interest, data)
       this.activeTracks.push({"id": parsedHint.tracks[i].id,
                               "seq": parsedHint.tracks[i].seq, 
                              "timeoutCnt": 0});
+      console.log("Fetching new track " + parsedHint.tracks[i].id);
     }
   }
   // express interest for the new hint
