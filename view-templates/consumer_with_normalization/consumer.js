@@ -4,7 +4,9 @@
 //  For licensing details see the LICENSE file.
 //
 //  Author:  Zhehao Wang; Peter Gusev
-//  March 12 5PM version with initial interest pipelining.
+//  March 29 8PM version with producer modifications on application PIT.
+
+// TODO: hinttimeout needs to be better handled.
 
 /**
  * Consumer creates a consumer for ndn-opt; The consumer follows the protocol
