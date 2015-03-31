@@ -26,7 +26,7 @@ var Interest = require('ndn-js').Interest;
 var Data = require('ndn-js').Data;
 var Exclude = require('ndn-js').Exclude;
 
-var PipelineSize = 10;
+var PipelineSize = 3;
 
 var lastReceivedTimestamp = 0;
 
@@ -66,7 +66,9 @@ Consumer.prototype.onTrackData = function(interest, data)
   var receivedTime = (new Date).getTime();
   var timeGap = receivedTime - lastReceivedTimestamp;
   lastReceivedTimestamp = receivedTime;
-  console.log("Time gap between this and last received data: " + timeGap);
+  if (timeGap > 100) {
+    console.log("Time gap between this and last received data: " + timeGap);
+  }
   
   var trackId = parseInt(data.getName().get
     (ProducerNameComponents.trackIdOffset).toEscapedString());
@@ -301,7 +303,7 @@ Consumer.prototype.pipeline = function (trackName, startSeqNo, endSeqNo)
     trackInterest.setMustBeFresh(true);
     this.face.expressInterest
       (trackInterest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));    
-    console.log("pipelining interest "+ trackInterest.getName().toUri())
+    //console.log("pipelining interest "+ trackInterest.getName().toUri())
   }
   //console.log("pipelined interests for "+trackName.toUri()+" "+startSeqNo+":"+endSeqNo);
 }
