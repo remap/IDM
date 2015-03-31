@@ -12,7 +12,6 @@ var Name = require('ndn-js').Name;
 function displayCallback(trackData)
 {
   var data = trackData;
-  console.log("x " + data.x + " y " + data.y);
 }
 
 function run()

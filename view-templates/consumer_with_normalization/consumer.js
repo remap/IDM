@@ -38,7 +38,7 @@ var Consumer = function(face, root, spaceName, displayCallback)
   
   this.startTimeComponent = new Name.Component();
   // this records the indices of the tracks that have been active since the start of this run.
-  this.activeTracks = [];
+  this.activeTracks = {};
   
   // JB - commented out as it will generate a significant memory leak 
   // All fetched track data is stored in this array: may want to organize it.
@@ -49,59 +49,46 @@ var Consumer = function(face, root, spaceName, displayCallback)
   this.displayCallback = displayCallback;
 };
 
-
-// Consumer.prototype.getTrackData = function()
-// {
-//   return this.trackData;
-// };
-
-Consumer.prototype.getActiveTrack = function()
-{
-  return this.activeTracks;
-};
-
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/tracks/[track_num]/[seq_num]
 Consumer.prototype.onTrackData = function(interest, data)
 {
-  var receivedTime = (new Date).getTime();
-  var timeGap = receivedTime - lastReceivedTimestamp;
-  lastReceivedTimestamp = receivedTime;
-  if (timeGap > 100) {
-    console.log("Time gap between this and last received data: " + timeGap);
-  }
-  
-  var trackId = parseInt(data.getName().get
-    (ProducerNameComponents.trackIdOffset).toEscapedString());
-  var activeTrackIndex = this.indexOfTrackId(trackId);
+  var trackId = data.getName().get
+    (ProducerNameComponents.trackIdOffset).toEscapedString();
   var receivedSeq = parseInt(data.getName().get(-1).toEscapedString());
 
-  if (!this.activeTracks[activeTrackIndex])
+  if (!this.activeTracks[trackId])
   {
-    console.log("onData: no data for "+trackId + " idx "+activeTrackIndex);
+    console.log("onData: no data for " + trackId);
     return ;
   }
   
-  if (receivedSeq > this.activeTracks[activeTrackIndex].lastReceivedSeq)
+  var receivedTime = (new Date).getTime();
+  var timeGap = receivedTime - lastReceivedTimestamp;
+  lastReceivedTimestamp = receivedTime;
+  console.log("Time gap between this and last received data: " + timeGap);
+  console.log("received seq " + receivedSeq + "; last received seq " + this.activeTracks[trackId].lastReceivedSeq);
+  
+  if (receivedSeq > this.activeTracks[trackId].lastReceivedSeq)
   {
-    this.activeTracks[activeTrackIndex].lastReceivedSeq = receivedSeq;
-    var moreInterests = PipelineSize+receivedSeq-this.activeTracks[activeTrackIndex].lastIssuedSeq;
-    //console.log("more "+moreInterests+" to issue. last "+this.activeTracks[activeTrackIndex].lastIssuedSeq + " received "+receivedSeq + " size "+PipelineSize);
-
+    this.activeTracks[trackId].lastReceivedSeq = receivedSeq;
+    var moreInterests = PipelineSize + receivedSeq - this.activeTracks[trackId].lastIssuedSeq;
+    
     if (moreInterests != 0)
     {
       var trackName = new Name(data.getName().getPrefix(-1));
-      var startSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq;
-      var endSeq = this.activeTracks[activeTrackIndex].lastIssuedSeq+moreInterests;
-      this.activeTracks[activeTrackIndex].lastIssuedSeq = endSeq;
+      var startSeq = this.activeTracks[trackId].lastIssuedSeq;
+      var endSeq = this.activeTracks[trackId].lastIssuedSeq + moreInterests;
+      this.activeTracks[trackId].lastIssuedSeq = endSeq;
       this.pipeline(trackName, startSeq, endSeq)
     }
   }
   else
   {
+    console.log("data out of date, received seq " + receivedSeq + "; last received seq " + this.activeTracks[trackId].lastReceivedSeq);
     // out-dated data, don't bother
     return ; 
   }
-
+  
   var parsedTrack = JSON.parse(data.getContent().buf());
   //this.trackData.push(parsedTrack);
 
@@ -109,12 +96,11 @@ Consumer.prototype.onTrackData = function(interest, data)
     this.displayCallback(parsedTrack);
   }
 
-  if (activeTrackIndex != -1) {
-    this.activeTracks[activeTrackIndex].timeoutCnt = 0;
+  if (this.activeTracks[trackId] != undefined) {
+    this.activeTracks[trackId].timeoutCnt = 0;
   }
   else {
-	this.activeTracks.push({"id": trackId,
-						   "timeoutCnt": 0});
+	this.activeTracks[trackId].timeoutCnt = 0;
   } 
 };
 
@@ -129,56 +115,39 @@ Consumer.prototype.onTrackTimeout = function(interest)
   //var timeout = new Interest(new Name("/local/timeout"));
   //timeout.setInterestLifetimeMilliseconds(Config.defaultReexpressInterval);
   
-  // trackId is always assumed to be 
   var trackId = parseInt(interest.getName().get
     (ProducerNameComponents.trackIdOffset).toEscapedString());
-  var activeTrackIndex = this.indexOfTrackId(trackId);
   var trackSeqNo = parseInt(interest.getName().get
     (ProducerNameComponents.trackSeqOffset).toEscapedString());
 
-  if (!this.activeTracks[activeTrackIndex])
+  if (!this.activeTracks[trackId])
   {
-    console.log("onTimeout: no data for "+trackId + " idx "+activeTrackIndex);
+    console.log("onTimeout: no data for " + trackId);
     return ;
   }
 
-  if (this.activeTracks[activeTrackIndex] &&
-    trackSeqNo > this.activeTracks[activeTrackIndex].lastReceivedSeq)
+  if (this.activeTracks[trackId] &&
+    trackSeqNo > this.activeTracks[trackId].lastReceivedSeq)
   {
     // re-express
-    //console.log('re-express '+interest.getName().toUri()+ ". last received "+this.activeTracks[activeTrackIndex].lastReceivedSeq);
+    //console.log('re-express '+interest.getName().toUri()+ ". last received "+this.activeTracks[trackId].lastReceivedSeq);
     this.face.expressInterest
         (interest, this.onTrackData.bind(this), this.onTrackTimeout.bind(this));
   }
 };
 
-Consumer.prototype.indexOfTrackId = function(id)
-{
-  for (var i = 0; i < this.activeTracks.length; i++) {
-    if (this.activeTracks[i].id == id) {
-      return i;
-    }
-  }
-  return -1;
-}
-
 // Expected data name: [root]/opt/[node_num]/[start_timestamp]/track_hint/[num]
 Consumer.prototype.onHintData = function(interest, data)
 {
-  //console.log("onHintData called: " + data.getName().toUri());
   var parsedHint = JSON.parse(data.getContent().buf());
-  //console.log("\t"+data.getContent().buf())
+  
   for (var i = 0; i < parsedHint.tracks.length; i++) {
-    
-    // The consumer ignores the sequence number field in the hint for now;
-    // As the consumer assumes it's getting the latest via outstanding interest.
-    // Right now the consumer does not stop fetching tracks that have become inactive.
-    if (this.indexOfTrackId(parsedHint.tracks[i].id) == -1) {
-      this.activeTracks.push({"id": parsedHint.tracks[i].id,
-                              "seq": parsedHint.tracks[i].seq, 
-                              "timeoutCnt": 0,
-                              "lastReceivedSeq": 0,
-                              "lastIssuedSeq": 0});
+    var trackId = parsedHint.tracks[i].id.toString();
+    if (this.activeTracks[trackId] == undefined) {
+      this.activeTracks[trackId] = {"seq": parsedHint.tracks[i].seq, 
+                                    "timeoutCnt": 0,
+                                    "lastReceivedSeq": 0,
+                                    "lastIssuedSeq": 0};
       this.fetchTrack(parsedHint.tracks[i].id, parsedHint.tracks[i].seq);
     }
   }
@@ -215,7 +184,7 @@ Consumer.prototype.onHintTimeout = function(interest)
   //timeout.setInterestLifetimeMilliseconds(Config.defaultReexpressInterval);
   
   //jb 
-  this.activeTracks = [];
+  this.activeTracks = {};
 
   this.face.expressInterest
     (interest, this.onHintData.bind(this), this.onHintTimeout.bind(this));
@@ -278,7 +247,7 @@ Consumer.prototype.dummyOnData = function(interest, data)
 }
 
 // Start fetching the track from using rightmostchild (JB) - can't start with seq 0 if we don't know if
-Consumer.prototype.fetchTrack= function(trackId, seqNo)
+Consumer.prototype.fetchTrack = function(trackId, seqNo)
 {
   var trackName = new Name(this.prefix);
   
@@ -287,9 +256,8 @@ Consumer.prototype.fetchTrack= function(trackId, seqNo)
     (ProducerNameComponents.tracks).append
     (trackId.toString());  // .append("0");
   
-  var trackIdx = this.indexOfTrackId(trackId);
-  this.activeTracks[trackIdx].lastIssuedSeq = seqNo+PipelineSize;
-  this.pipeline(trackName, seqNo, this.activeTracks[trackIdx].lastIssuedSeq);
+  this.activeTracks[trackId].lastIssuedSeq = seqNo + PipelineSize;
+  this.pipeline(trackName, seqNo, this.activeTracks[trackId].lastIssuedSeq);
 };
 
 Consumer.prototype.pipeline = function (trackName, startSeqNo, endSeqNo)

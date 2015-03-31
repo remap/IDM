@@ -48,20 +48,13 @@
      * @param {Decoded JSON object} the track data received from consumer
      */
     
-    $( document ).ready(function() {
+    $(document).ready(function() {
       function displayCallback(trackData)
         {
+          normalize(trackData);
 
-          // make a copy of the object
-          var data = JSON.parse(JSON.stringify(trackData));
-
-          normalize(data);
-
-          //console.log("data.x " + data.x + "data.y" + data.y);          
-
-          $('#square').css("top", (data.y*597) - 50);
-          $('#square').css("left", (data.x*1920) - 50); 
-
+          $('#square').css("top", (trackData.y * 597) + 50);
+          $('#square').css("left", (trackData.x * 1920) + 50); 
         }
         
       function run()

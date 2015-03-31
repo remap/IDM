@@ -22,7 +22,7 @@ Config = {
   
   // The threshold for number of timeouts received in a row to decide not to fetch certain
   // track anymore
-  trackTimeoutThreshold		: 20
+  trackTimeoutThreshold		: 5
 };
 
 ProducerNameComponents = {
