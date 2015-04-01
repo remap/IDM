@@ -18,7 +18,7 @@ Config = {
   initialReexpressInterval	: 1000,
   defaultInitialLifetime	: 2000,
   defaultTrackLifetime		: 150,
-  defaultHintLifetime		: 5000,
+  defaultHintLifetime		: 50000,
   
   // The threshold for number of timeouts received in a row to decide not to fetch certain
   // track anymore

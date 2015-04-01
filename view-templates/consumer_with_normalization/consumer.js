@@ -28,8 +28,6 @@ var Exclude = require('ndn-js').Exclude;
 
 var PipelineSize = 3;
 
-var lastReceivedTimestamp = 0;
-
 var Consumer = function(face, root, spaceName, displayCallback)
 {
   this.face = face;
@@ -61,12 +59,6 @@ Consumer.prototype.onTrackData = function(interest, data)
     console.log("onData: no data for " + trackId);
     return ;
   }
-  
-  var receivedTime = (new Date).getTime();
-  var timeGap = receivedTime - lastReceivedTimestamp;
-  lastReceivedTimestamp = receivedTime;
-  console.log("Time gap between this and last received data: " + timeGap);
-  console.log("received seq " + receivedSeq + "; last received seq " + this.activeTracks[trackId].lastReceivedSeq);
   
   if (receivedSeq > this.activeTracks[trackId].lastReceivedSeq)
   {

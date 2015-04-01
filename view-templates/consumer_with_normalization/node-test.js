@@ -9,9 +9,28 @@ var Config = require('./config.js').Config;
 var Face = require('ndn-js').Face;
 var Name = require('ndn-js').Name;
 
+var lastTimestamp = 0;
+var lastReceivedTimestamp = 0;
+
 function displayCallback(trackData)
 {
+  
+  var receivedTime = (new Date).getTime();
+  var timeGap = receivedTime - lastReceivedTimestamp;
+  lastReceivedTimestamp = receivedTime;
+  if (timeGap > 100) {
+    console.log("Time gap between this and last received data: " + timeGap);
+  }
+ 
   var data = trackData;
+  var timestamp = trackData.sec * 1000000 + trackData.nsec;
+  var timeDiff = timestamp - lastTimestamp
+  if (timeDiff > 33333333) {
+    console.log("Time gap between two publishes: " + timeDiff);
+  }
+  lastTimestamp = timestamp;
+  
+  console.log(receivedTime - timestamp / 1000);
 }
 
 function run()
