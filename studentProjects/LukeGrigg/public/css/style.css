@@ -1,0 +1,228 @@
+body {
+	margin: 0px;
+}
+
+.background {
+	position: absolute;
+	background-color: transparent;
+	
+}  
+
+.background1 {
+	position: absolute;
+	background-color: transparent;
+	z-index: -1;	
+}                  
+
+       
+
+
+
+.noDisplay {
+	display: none;
+}
+
+
+.move {
+	position: relative;
+	width: 25px;
+	height: 25px;
+	border: 1px solid #000;
+	border: none;
+	z-index: 100;
+	display:none;
+}
+
+/*body{
+	margin: 0px;
+	background-color: #438DE8;
+
+}*/
+
+.wings{
+	width: 290px;
+	height: 597px;
+/*	background-color: blue;
+	border: 1px black dotted;*/
+	float: left;
+}
+
+#main_wall{
+	width: 978px;
+	height: 597px;
+	background-color: red;
+	border: 1px black dotted;
+	float: left;
+}
+
+.rear{
+	width: 340px;
+	height: 597px;
+/*	background-color: green;
+	border: 1px black dotted;*/
+	float: left;
+}
+
+#main_wings {
+	width: 1558px;
+	height: 597px;
+/*	border: 1px black dotted;*/
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+
+#windowSize {
+	height: 380px;
+	width: 754px;
+	position: absolute; 
+	left: 362px;
+	background-color: rgba(0,0,0,0);
+}
+
+#pane1 {
+	position: absolute;
+	left: -3px;
+	top: 255px;
+	height:120px;
+	width: 158px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane2 {
+	position: absolute;
+	left: 175px;
+	top: 255px;
+	height:130px;
+	width: 190px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane3 {
+	position: absolute;
+	left: -1px;
+	top: 122px;
+	height:123px;
+	width: 164px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane4 {
+	position: absolute;
+	left: 179px;
+	top: 122px;
+	height:122px;
+	width: 185px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane5 {
+	position: absolute;
+	left: 0px;
+	top: 1px;
+	height:112px;
+	width: 164px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane6 {
+	position: absolute;
+	left: 181px;
+	top: 0px;
+	height:113px;
+	width: 185px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane7 {
+	position: absolute;
+	left: 375px;
+	top: 0px;
+	height:111px;
+	width: 193px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane8 {
+	position: absolute;
+	left: 586px;
+	top: 0px;
+	height:110px;
+	width: 170px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane9 {
+	position: absolute;
+	left: 374px;
+	top: 119px;
+	height:129px;
+	width: 195px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane10 {
+	position: absolute;
+	left: 587px;
+	top: 120px;
+	height:123px;
+	width: 167px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane11 {
+	position: absolute;
+	left: 376px;
+	top: 255px;
+	height:129px;
+	width: 193px;
+	z-index: -5;
+	overflow: hidden;
+	/*background-color: red;*/
+}
+
+#pane12 {
+	position: absolute;
+	left: 589px;
+	top: 254px;
+	height: 122px;
+	width: 165px;
+	z-index: -5;
+	overflow: hidden;
+/*	background-color: red;*/
+}
+
+.videoResize {
+	position:absolute;
+	width: 150%;
+	height: auto;
+	z-index:-4;
+}
+
+
+.paneBroughtForward {
+	z-index: 2;
+	position: absolute;
+	background-color: transparent url('images/Pane1.png');
+}
