@@ -172,7 +172,7 @@ function doExample() {
         if (REGIONS[region].count < 1) continue; 
     
         // Pick which image to use 
-        k = Math.floor( Math.random() * REGIONS[region].available_images)  
+        k = Math.floor( Math.random() * REGIONS[region].available_images); 
         
         // Build the filename for the image
         filename = "images/" + region + "/" + k + ".jpg";
