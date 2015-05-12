@@ -1,0 +1,24 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="sprintf.js"></script>  <!-- Just a utility for the occupancy.js example --> 
+<script type="text/javascript" src="tinydancer.js"></script>
+</head>
+<body>
+   <div style='width:50%; float:left'>&nbsp;</div>
+   <div id="controls" style='width:50%; float:right'> 
+        <hr />  
+       <a href="#" onClick="isPaused=true;">PAUSE</a> 
+       | <a href="#" onClick="isPaused=false;">PLAY</a> 
+       | <a href="#" onClick="generateFakeData(true);">STEP</a>
+       | Region stickiness: <a href="#" onClick="useRegionStickiness=true;">on</a>
+                            <a href="#" onClick="useRegionStickiness=false;">off</a>
+      | <a href="#" onClick="resetPositions()">Reset Positions</a>
+       
+       <div style='font-family: Courier New, Courier; width: 50%;' id='debugOutput'></div>  
+       <hr />
+       <div style='text-align:center; width: 50%;' id='images'></div>  
+   </div>
+   <script type='text/javascript'>onPageLoad();</script>
+<body> 
+</html>
