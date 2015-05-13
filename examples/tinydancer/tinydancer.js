@@ -16,10 +16,17 @@ var MAX_Y = 475;
 
 // Sample tracks
 // Initialize the sample tracks here using a list comprehension for compactness
-var tracks = [for (id of [0,1,2,3,4,5,6,7,8,9]) [id,Math.floor(Math.random()*MAX_X),Math.floor(Math.random()*MAX_Y)]];
+// List comprehensions not supported on Chrome? 
+// Old:
+//    var tracks = [for (id of [0,1,2,3,4,5,6,7,8,9]) [id,Math.floor(Math.random()*MAX_X),Math.floor(Math.random()*MAX_Y)]];
+//   var last_occupied = [for (x of tracks) []]; 
 
-// Hold the last regions occupied for each track
-var last_occupied = [for (x of tracks) []]; 
+var tracks = []; 
+var last_occupied = []; // Hold the last regions occupied for each track
+for (id in [0,1,2,3,4,5,6,7,8,9])  {
+    tracks.push([id,Math.floor(Math.random()*MAX_X),Math.floor(Math.random()*MAX_Y)]);
+    last_occupied.push([]);
+    }
 
 // The sprites we'll animate
 var sprites = []; 
