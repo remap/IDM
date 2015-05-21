@@ -1,7 +1,7 @@
 
 // CHANGE THIS VARIBLE TO 
 // false TO USE OPEN_PTRACK 
-var USE_OSC = true;         // Set to false to use OPT
+var USE_OSC = false;         // Set to false to use OPT
 
 
 // Declare functions for both OPT (Chiparaki OpenPTrack) and OSC (TouchOSC)
@@ -21,7 +21,8 @@ $( document ).ready(function() {
       function onOPTData(trackData)
         {
           var data = JSON.parse(JSON.stringify(trackData));
-          OpenPTrack.normalize(data);
+          OpenPTrackJS.normalize(data);
+
           console.log("OPT data.id " + data.id + " x,y=" + data.x + "," + data.y);  
           onData([data]);  // Callback into project code      
         }
