@@ -1,0 +1,50 @@
+body{
+	margin: 0px;
+	font-family: Arial;
+	background-color: #555;
+}
+
+div{
+	float:left;
+}
+
+#WingL {
+	width: 288px;
+	height: 595px;
+	background-color: #000;
+	border: 1px #ccc dotted;
+}
+
+#WingR {
+	width: 288px;
+	height: 595px;
+	background-color: #000;
+	border: 1px #ccc dotted;
+}
+
+
+#MainWall {
+	width: 976px;
+	height: 595px;
+	background-color: #000;
+	border: 1px #ccc dotted;
+}
+
+#RearR {
+	width: 179px;
+	height: 595px;
+	background-color: #000;
+	border: 1px #ccc dotted;
+}
+
+#RearL {
+	width: 179px;
+	height: 595px;
+	background-color: #000;
+	border: 1px #ccc dotted;
+}
+
+h1 {
+	font-size: 4rem;
+	text-align: center;
+}

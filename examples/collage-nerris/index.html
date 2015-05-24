@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"> 
+	<title>Collage example</title>
+	
+	<!-- Chiparaki projection template --> 
+	<link type="text/css" rel="stylesheet" href="css/chiparaki-projection.css" />	
+	
+	        
+	<!-- Our collage style sheet, based on the examples -->
+	<link type="text/css" rel="stylesheet" href="css/collage.css" />
+		
+	<!-- Our image selection script and dependency -->
+	<script src="js/sprintf.js"></script>
+	<script src="js/jbCollage.js"></script>
+	
+	<!-- NOTE: Our CollagePlus is modified! Check the js --> 
+	<!-- Begin CollagePlus --> 
+        <link rel="stylesheet" type="text/css" href="js/CollagePlus/css/transitions.css" media="all" />
+
+        <!--[if lt IE 9]>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <![endif]-->
+        <!--[if (gte IE 9) | (!IE)]><!-->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+        <!--<![endif]-->
+
+        <!--[if IE]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+        
+        <script src="js/CollagePlus/jquery.collagePlus.jburke.js"></script>
+        <script src="js/CollagePlus/extras/jquery.removeWhitespace.js"></script>
+        <script src="js/CollagePlus/extras/jquery.collageCaption.js"></script>
+        
+        <script type="text/javascript">
+
+        
+            var THEMES = [ "business", "clothing", "coffee", "culture", "food" ]; 
+            function getRandomTheme() { return THEMES[ Math.floor(Math.random()*THEMES.length) ]; } 
+            
+            // All images need to be loaded for this plugin to work so
+            // we end up waiting for the whole window to load in this example
+            $(window).load(function () {
+                $(document).ready(function(){
+                    var files = loadFiles(); // acquire the current file list; 
+                    var theme = getRandomTheme();   // This would be selected by the position of the visitor in the space
+                    loadImages(theme);   // jbCollage.js 
+                    collage();      // CollagePlus
+                });
+            });
+
+            // Here we apply the actual CollagePlus plugin
+            function collage() {
+                $('.Collage').removeWhitespace().collagePlus(
+                    {
+                        'allowPartialLastRow' : false,       // Try with and without this
+                        'fadeSpeed'     : 2000,
+                        'targetHeight'  : 180               // DEFAULT target height, can set per section in jburke version
+                    }
+                );
+            };
+
+        </script>
+    
+    
+    <!-- End CollagePlus --> 
+
+</head>
+<body>
+
+    <!-- Wing Left -->
+	<div id="WingL" class="projector-section">
+	<section id="collage-WingL" class="Collage effect-parent"> <!-- Will set targetHeight attribute programmatically in the script -->
+	    <!-- Will fill this from javascript -->
+	</section>
+	</div>
+	
+	<!-- Main Wall --> 
+	<div id="MainWall" class="projector-section">
+	<section id="collage-MainWall" class="Collage effect-parent">
+	    <!-- Will fill this from javascript -->
+	</section>
+	</div>	
+	
+	<!-- Wing Right --> 
+	<div id="WingR" class="projector-section">
+	<section id="collage-WingR" class="Collage effect-parent">
+	    <!-- Will fill this from javascript -->
+	</section>
+	</div>
+	
+	<!-- Rear Right --> 
+	<div id="RearR" class="projector-section">
+	<section id="collage-RearR" class="Collage effect-parent"">
+	    <!-- Will fill this from javascript -->
+	</section>
+	</div>
+	
+	<!-- Rear Left --> 
+	<div id="RearL" class="projector-section">
+	<section id="collage-RearL" class="Collage effect-parent">
+	    <!-- Will fill this from javascript -->
+	</section>	
+	</div>
+	
+</body>
+</html>
