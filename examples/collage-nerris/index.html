@@ -37,17 +37,26 @@
         <script type="text/javascript">
 
         
-            var THEMES = [ "business", "clothing", "coffee", "culture", "food" ]; 
+            var THEMES = ["Business", "Clothing", "Culture", "FoodCoffee"]; // [ "business", "clothing", "coffee", "culture", "food" ]; 
             function getRandomTheme() { return THEMES[ Math.floor(Math.random()*THEMES.length) ]; } 
             
             // All images need to be loaded for this plugin to work so
             // we end up waiting for the whole window to load in this example
             $(window).load(function () {
                 $(document).ready(function(){
-                    var files = loadFiles(); // acquire the current file list; 
-                    var theme = getRandomTheme();   // This would be selected by the position of the visitor in the space
-                    loadImages(theme);   // jbCollage.js 
-                    collage();      // CollagePlus
+                    $.getJSON( "getImages.php",     // Retrieve the file list 
+                    function( files ) {
+                        var theme = getRandomTheme();   // This would be selected by the position of the visitor in the space
+                        loadImages(theme, files);   // jbCollage.js 
+                        collage();      // CollagePlus    
+                    });
+                    
+                    
+                    // set a timer to reload after 8 seconds
+                    setInterval(function(){  document.location.reload(false); }, 8000);
+                   
+                    
+                    
                 });
             });
 
