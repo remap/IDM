@@ -1,0 +1,30 @@
+* {
+	box-sizing: border-box;
+}
+
+body{
+	margin: 0px;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+#jumpDiv {
+	display: block;
+	height: 1200px;
+	width: 2000px;
+	background-color: blue;
+}
+
+#jumpDiv * {
+	margin: auto;
+	background-color: white;
+	width: 500px;
+	height: 500px;
+	font-size: 20em;
+	text-align: center;
+	font-family: sans-serif;
+	-webkit-box-shadow: -12px 13px 107px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: -12px 13px 107px 0px rgba(0,0,0,0.75);
+	box-shadow: -12px 13px 107px 0px rgba(0,0,0,0.75);
+}
