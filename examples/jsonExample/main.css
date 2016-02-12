@@ -1,0 +1,47 @@
+body{
+	font-family: "Comic Sans MS";
+}
+
+.button{
+	width: 500px;
+	background-color: rgb(0,255,0);
+	color: black;
+	
+	text-align: center;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin: 0 auto;
+	margin-top: 100px;
+}
+
+.button:hover{
+	background-color: rgb(255,0,0);
+	color: white;
+}
+
+.dataContainer{
+	background-color: orange;
+	width: 500px;
+	margin: 0 auto;
+
+}
+
+.dataContainer ul{
+	list-style: none;
+}
+
+.dataContainer ul li{
+	background-color: pink;
+	padding-left: 5px;
+}
+
+#wow{
+	background-color: magenta;
+	font-weight: bold;
+	color:cyan;
+}
+
+#sad{
+	background-color: lightblue;
+	color: darkblue;
+}

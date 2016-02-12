@@ -1,0 +1,49 @@
+{
+	"movieDatabase" : {
+		"movies" : [
+			
+			{ 
+				"title" : "my cool movie",
+				"src" : "some/file/path/to/movie.mp4",
+				"runTime" : 60,
+				"width" : 1280,
+				"height" : 720,
+				"tags" : [
+					{ "tag" : "cool" },
+					{ "tag" : "rare" },
+					{ "tag" : "meme" },
+					{ "tag" : "omg" },
+					{ "tag" : "sad" },
+					{ "tag" : "lol" },
+					{ "tag" : "feels" }
+				]
+			},
+			
+			{
+				"title" : "another rad film",
+				"src" : "some/file/path/to/another/movie2.mp4",
+				"runTime" : 12,
+				"width" : 1920,
+				"height" : 1080,
+				"tags" : [
+					{ "tag" : "bernie sanders" },
+					{ "tag" : "donald trump" },
+					{ "tag" : "politics" }
+				]
+			} ,
+
+			{
+				"title" : "i can't believe there are more cool movies",
+				"src" : "movie3.mp4",
+				"runTime" : 12.98,
+				"width" : 100,
+				"height" : 100,
+				"tags" : [
+					{ "tag" : "wow" },
+					{ "tag" : "space" },
+					{ "tag" : "balloons" }
+				]
+			} 
+		]
+	}
+}
